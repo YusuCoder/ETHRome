@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct s_token
 {
@@ -10,13 +11,75 @@ typedef struct s_token
     int             data_size;      // Size of the binary data in bytes
 }   t_token;
 
-int divide_mp3(char *mp3_file, t_token  *tokens)
+// Function to get song duration using ffmpeg
+float get_mp3_duration(const char *mp3_file)
+{
+    FILE *fp = fopen(mp3_file, "rb");
+    if (!fp) {
+        printf("Error: Unable to open file %s\n", mp3_file);
+        return 0.0;
+    }
+
+    unsigned char header[10];
+    size_t bytesRead = fread(header, 1, 10, fp);
+    if (bytesRead < 10) {
+        printf("Error: Unable to read file header\n");
+        fclose(fp);
+        return 0.0;
+    }
+
+    // Check for valid MP3 frame sync (11 bits of 1s)
+    if (header[0] != 0xFF || (header[1] & 0xE0) != 0xE0) {
+        printf("Error: Not a valid MP3 file\n");
+        fclose(fp);
+        return 0.0;
+    }
+
+    // Extract bitrate (bits 12-15)
+    int bitrateIndex = (header[2] >> 4) & 0x0F;  // bits 12-15
+    int sampleRateIndex = (header[2] >> 2) & 0x03; // bits 10-11
+
+    // Bitrates according to MPEG-1 Layer III
+    int bitrates[] = {0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320};
+    int sampleRates[] = {44100, 48000, 32000}; // in Hz
+
+    // Get bitrate and sample rate
+    int bitrate = (bitrateIndex < sizeof(bitrates) / sizeof(bitrates[0])) ? bitrates[bitrateIndex] * 1000 : 0;
+    int sampleRate = (sampleRateIndex < sizeof(sampleRates) / sizeof(sampleRates[0])) ? sampleRates[sampleRateIndex] : 0;
+
+    // If bitrate is not valid
+    if (bitrate == 0 || sampleRate == 0) {
+        printf("Error: Invalid bitrate or sample rate\n");
+        fclose(fp);
+        return 0.0;
+    }
+
+    // Calculate file size
+    fseek(fp, 0, SEEK_END);
+    long fileSize = ftell(fp);
+    fclose(fp);
+
+    // Calculate duration in seconds
+    float duration = (float)fileSize * 8 / bitrate;  // Convert bytes to bits
+
+    return duration;
+}
+
+int divide_mp3(char *mp3_file, t_token *tokens)
 {
     FILE    *mp3File;
     long    fileSize;
     int     partSize, remainder, i;
-    float   songDuration = 240.0;  // duration in seconds (example: 4 minutes)
-    float   partDuration = songDuration / 1000.0;
+    float   songDuration;            // Duration in seconds
+
+    // Get the actual duration of the song
+    songDuration = get_song_duration(mp3_file);
+    if (songDuration == 0.0) {
+        printf("Error: Unable to retrieve song duration.\n");
+        return 1;
+    }
+
+    float partDuration = songDuration / 1000.0;
 
     // Open the input MP3/WAV file in binary mode
     mp3File = fopen(mp3_file, "rb");
@@ -69,12 +132,6 @@ int divide_mp3(char *mp3_file, t_token  *tokens)
         tokens[i].data_size = fread(tokens[i].data, 1, remainder, mp3File);
     }
 
-    // // Output metadata and binary data for verification
-    // for (i = 0; i < 1000; i++) {
-    //     printf("Token %d: Start time = %.2f seconds, End time = %.2f seconds, Data size = %d bytes\n",
-    //             tokens[i].part_number, tokens[i].start_time, tokens[i].end_time, tokens[i].data_size);
-    // }
-
     fclose(mp3File);
 
     return 0;
@@ -83,7 +140,9 @@ int divide_mp3(char *mp3_file, t_token  *tokens)
 int main(void)
 {
     t_token tokens[1001];
-    char    *mp3_file = "i_will.mp3";
+    char *mp3_file = "i_will.mp3";
 
     divide_mp3(mp3_file, tokens);
+	
+    return 0;
 }
