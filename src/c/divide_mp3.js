@@ -58,3 +58,6 @@ async function divideMp3(mp3File, artistInfo) {
 
     const tokens = await divideMp3(mp3File, artistInfo);
 })();
+
+// npm install fs
+// npm install music-metadata
