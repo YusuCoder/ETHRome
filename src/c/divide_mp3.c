@@ -81,6 +81,7 @@ float get_song_duration(const char *mp3_file)
         printf("Error: Calculated duration is negative, check bitrate and frame calculations.\n");
         return 0.0;
     }
+	printf("%f", duration);
     return duration;
 }
 
@@ -89,7 +90,7 @@ float get_song_duration(const char *mp3_file)
 int divide_mp3(char *mp3_file, t_token  *tokens)
 {
     FILE    *mp3File;
-    float   songDuration = 240.0;  // duration in seconds (example: 4 minutes)
+    float   songDuration;  // duration in seconds (example: 4 minutes)
     float   partDuration = songDuration / 1000.0;
     int     i;
 
@@ -99,21 +100,8 @@ int divide_mp3(char *mp3_file, t_token  *tokens)
         printf("Error: Unable to open input file.\n");
         return 1;
     }
-
-<<<<<<< HEAD
 songDuration = get_song_duration(mp3_file);
 
-    // Find the size of the file
-    fseek(mp3File, 0, SEEK_END);
-    fileSize = ftell(mp3File);
-    fseek(mp3File, 0, SEEK_SET);
-
-    // Calculate the size of each part in bytes
-    partSize = fileSize / 1000;
-    remainder = fileSize % 1000;
-
-=======
->>>>>>> ea9c73dcb16e5278f467311a80066c942aeba739
     // Loop through and create 1000 parts, storing metadata and binary data
     for (i = 0; i < 1000; i++) {
         // Prepare token metadata
@@ -136,7 +124,7 @@ songDuration = get_song_duration(mp3_file);
 int main(void)
 {
     t_token tokens[1000];
-    char    *mp3_file = "i_will.mp3";
+    char    *mp3_file = "i_will2.mp3";
 
     divide_mp3(mp3_file, tokens);
 }
