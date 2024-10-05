@@ -27,7 +27,7 @@
                         <i class="fa-solid fa-lock"></i>
                         <input type="password" placeholder="Password">
                     </div>
-                    <p>Forgot password? <a href="#">Reset it here</a></p>
+                    <p id="forgot_password" class="forgot_pass">Forgot password? <a href="#">Reset it here</a></p>
                 </div>
                 <div class="btn-field">
                     <button type="button" id="sign-up">Sign Up</button>
@@ -42,12 +42,14 @@
         let signIn = document.getElementById("sign-in");
         let nameField = document.getElementById("name-field");
         let title = document.getElementById("title");
+        let f_pas = document.getElementById("forgot_password");
 
         signIn.onclick = function(){
             nameField.style.maxHeight = "0";
             title.innerHTML = "Sign In";
             signUp.classList.add("disable");
             signIn.classList.remove("disable");
+            f_pas.style.display = "block";
         }
 
         signUp.onclick = function() {
@@ -55,6 +57,8 @@
             title.innerHTML = "Sign Up";
             signUp.classList.remove("disable");
             signIn.classList.add("disable");
+            f_pas.classList.remove("forgot_pass");
+            f_pas.style.display = "none";
         }
      </script>
 </body>
