@@ -91,7 +91,7 @@ We welcome contributions! Here's how you can get involved:
 
 ## Support
 
-If you have any questions or need support, feel free to open an issue or contact us at support@musicnftplatform.com.
+If you have any questions or need support, feel free to open an issue or contact us
 
 ---
 
